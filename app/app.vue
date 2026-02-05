@@ -1,9 +1,10 @@
 <template>
   <div class="app-root">
-    <ClientOnly>
+    <!-- PageLoader temporarily disabled for debugging -->
+    <!-- <ClientOnly>
       <PageLoader @loaded="onLoaded" />
-    </ClientOnly>
-    <div :class="{ 'content-hidden': !isLoaded }">
+    </ClientOnly> -->
+    <div>
       <Hero3D />
       <Navbar />
       <NuxtPage />
