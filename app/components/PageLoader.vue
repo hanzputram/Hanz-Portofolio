@@ -1,6 +1,10 @@
 <template>
   <Transition name="loader-fade">
-    <div v-if="!isLoaded" class="loader-overlay" :class="{ 'reveal': isRevealing }">
+    <div
+      v-if="!isLoaded"
+      class="loader-overlay"
+      :class="{ reveal: isRevealing }"
+    >
       <div class="loader-container">
         <!-- The Luminal Thread -->
         <div class="thread-wrapper">
@@ -16,10 +20,10 @@
           </svg>
           <div ref="glowCircle" class="glow-circle"></div>
         </div>
-        
+
         <!-- Center Spike / Portal -->
         <div ref="portal" class="portal"></div>
-        
+
         <!-- Text Reveal -->
         <div class="loader-text-wrapper">
           <span ref="loaderText" class="loader-text">INITIALIZING CORE</span>
@@ -30,100 +34,136 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import gsap from 'gsap'
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
+import { ref, onMounted } from "vue";
+import gsap from "gsap";
 
-// Register plugin
-if (process.client) {
-  gsap.registerPlugin(MotionPathPlugin)
-}
+const isLoaded = ref(false);
+const isRevealing = ref(false);
+const pulsePath = ref(null);
+const glowCircle = ref(null);
+const portal = ref(null);
+const loaderText = ref(null);
 
-const isLoaded = ref(false)
-const isRevealing = ref(false)
-const pulsePath = ref(null)
-const glowCircle = ref(null)
-const portal = ref(null)
-const loaderText = ref(null)
+const emit = defineEmits(["loaded"]);
 
-const emit = defineEmits(['loaded'])
+onMounted(async () => {
+  // Dynamic import for plugin to avoid SSR issues
+  if (process.client) {
+    const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
+    gsap.registerPlugin(MotionPathPlugin);
+  }
 
-onMounted(() => {
   const tl = gsap.timeline({
     onComplete: () => {
-      isRevealing.value = true
-      setTimeout(() => {
-        isLoaded.value = true
-        emit('loaded')
-      }, 1000)
+      completeLoader();
+    },
+  });
+
+  // Safety Timeout: Force load after 10 seconds if animations hang
+  const safetyTimeout = setTimeout(() => {
+    if (!isLoaded.value) {
+      console.warn("Loader safety timeout triggered");
+      completeLoader();
     }
-  })
+  }, 8000);
+
+  const completeLoader = () => {
+    clearTimeout(safetyTimeout);
+    isRevealing.value = true;
+    setTimeout(() => {
+      isLoaded.value = true;
+      emit("loaded");
+    }, 1000);
+  };
 
   // Set initial states
-  gsap.set(pulsePath.value, { strokeDasharray: 2000, strokeDashoffset: 2000 })
-  gsap.set(glowCircle.value, { opacity: 0, scale: 0 })
-  gsap.set(portal.value, { scaleY: 0, scaleX: 0.002, opacity: 0 })
+  gsap.set(pulsePath.value, { strokeDasharray: 2000, strokeDashoffset: 2000 });
+  gsap.set(glowCircle.value, { opacity: 0, scale: 0 });
+  gsap.set(portal.value, { scaleY: 0, scaleX: 0.002, opacity: 0 });
 
   // 1. Thread Trace
   tl.to(pulsePath.value, {
     strokeDashoffset: 0,
     duration: 3,
-    ease: "power2.inOut"
-  })
-  .to(glowCircle.value, {
-    opacity: 1,
-    scale: 1,
-    duration: 0.5
-  }, 0.2)
+    ease: "power2.inOut",
+  }).to(
+    glowCircle.value,
+    {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+    },
+    0.2,
+  );
 
   // Move glow circle along path
-  tl.to(glowCircle.value, {
-    motionPath: {
-      path: pulsePath.value,
-      align: pulsePath.value,
-      alignOrigin: [0.5, 0.5]
+  tl.to(
+    glowCircle.value,
+    {
+      motionPath: {
+        path: pulsePath.value,
+        align: pulsePath.value,
+        alignOrigin: [0.5, 0.5],
+      },
+      duration: 3,
+      ease: "power2.inOut",
     },
-    duration: 3,
-    ease: "power2.inOut"
-  }, 0)
+    0,
+  );
 
   // 2. Text updates
-  tl.to(loaderText.value, {
-    opacity: 0,
-    y: -10,
-    duration: 0.3
-  }, "-=0.5")
-  .add(() => {
-    if (loaderText.value) loaderText.value.innerText = "ACCESS GRANTED"
-  })
-  .to(loaderText.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.3
-  })
+  tl.to(
+    loaderText.value,
+    {
+      opacity: 0,
+      y: -10,
+      duration: 0.3,
+    },
+    "-=0.5",
+  )
+    .add(() => {
+      if (loaderText.value) loaderText.value.innerText = "ACCESS GRANTED";
+    })
+    .to(loaderText.value, {
+      opacity: 1,
+      y: 0,
+      duration: 0.3,
+    });
 
   // 3. The Portal Shatter
-  tl.to(portal.value, {
-    opacity: 1,
-    scaleY: 1.5,
-    duration: 0.4,
-    ease: "expo.out"
-  }, "+=0.2")
-  .to(portal.value, {
-    scaleX: 1000, // Blow up horizontally
-    duration: 1.2,
-    ease: "power4.inOut"
-  })
-  .to(pulsePath.value, {
-    opacity: 0,
-    duration: 0.2
-  }, "-=1.0")
-  .to(glowCircle.value, {
-    scale: 100,
-    opacity: 0,
-    duration: 0.8
-  }, "-=1.0")
-})
+  tl.to(
+    portal.value,
+    {
+      opacity: 1,
+      scaleY: 1.5,
+      duration: 0.4,
+      ease: "expo.out",
+    },
+    "+=0.2",
+  )
+    .to(portal.value, {
+      scaleX: 1000, // Blow up horizontally
+      duration: 1.2,
+      ease: "power4.inOut",
+    })
+    .to(
+      pulsePath.value,
+      {
+        opacity: 0,
+        duration: 0.2,
+      },
+      "-=1.0",
+    )
+    .to(
+      glowCircle.value,
+      {
+        scale: 100,
+        opacity: 0,
+        duration: 0.8,
+      },
+      "-=1.0",
+    );
+});
 </script>
 
 <style scoped>
@@ -182,7 +222,9 @@ onMounted(() => {
   width: 1vw;
   height: 100vh;
   background: white;
-  box-shadow: 0 0 50px white, 0 0 100px var(--accent-secondary);
+  box-shadow:
+    0 0 50px white,
+    0 0 100px var(--accent-secondary);
   z-index: 10;
   pointer-events: none;
 }
@@ -194,7 +236,7 @@ onMounted(() => {
 }
 
 .loader-text {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.4em;
   color: rgba(255, 255, 255, 0.5);
@@ -211,8 +253,14 @@ onMounted(() => {
 }
 
 @keyframes flicker {
-  0% { opacity: 1; }
-  50% { opacity: 0.8; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>

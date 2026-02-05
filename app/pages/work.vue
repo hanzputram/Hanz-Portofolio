@@ -77,7 +77,7 @@ const projects = [
     year: "2024",
     tags: ["Laravel", "Tailwind CSS"],
     color: "#f05340",
-    image: "/vinsa-pc-thumbnail.png",
+    image: "./vinsa-pc-thumbnail.png",
     link: "https://vinsa.fr",
   },
   {

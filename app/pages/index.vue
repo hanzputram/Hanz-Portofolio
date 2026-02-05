@@ -132,7 +132,7 @@
                 >
                   <div class="project-image-wrapper">
                     <img
-                      src="/vinsa-thumbnail.png"
+                      src="./vinsa-thumbnail.png"
                       alt="Vinsa.fr"
                       class="project-thumbnail"
                     />
