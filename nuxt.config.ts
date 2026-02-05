@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     static: true,
   },
   app: {
+    baseURL: "/Hanz-Portofolio/",
     head: {
       title: "Interactive Experience - Next Gen Web",
       meta: [
