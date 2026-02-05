@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-const isLoaded = ref(false);
+const isLoaded = useState("isLoaded", () => true);
 
 const onLoaded = () => {
   isLoaded.value = true;
