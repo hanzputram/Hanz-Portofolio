@@ -47,28 +47,8 @@ const loaderText = ref(null);
 const emit = defineEmits(["loaded"]);
 
 onMounted(async () => {
-  // Dynamic import for plugin to avoid SSR issues
-  if (process.client) {
-    const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
-    gsap.registerPlugin(MotionPathPlugin);
-  }
-
-  const tl = gsap.timeline({
-    onComplete: () => {
-      completeLoader();
-    },
-  });
-
-  // Safety Timeout: Force load after 10 seconds if animations hang
-  const safetyTimeout = setTimeout(() => {
-    if (!isLoaded.value) {
-      console.warn("Loader safety timeout triggered");
-      completeLoader();
-    }
-  }, 8000);
-
   const completeLoader = () => {
-    clearTimeout(safetyTimeout);
+    if (isLoaded.value) return;
     isRevealing.value = true;
     setTimeout(() => {
       isLoaded.value = true;
@@ -76,10 +56,40 @@ onMounted(async () => {
     }, 1000);
   };
 
+  // Safety Timeout
+  const safetyTimeout = setTimeout(() => {
+    console.warn("Loader safety timeout triggered");
+    completeLoader();
+  }, 5000);
+
+  // Dynamic import for plugin
+  try {
+    if (process.client) {
+      const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
+      gsap.registerPlugin(MotionPathPlugin);
+    }
+  } catch (e) {
+    console.error("GSAP Plugin registration failed:", e);
+    completeLoader();
+    return;
+  }
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      clearTimeout(safetyTimeout);
+      completeLoader();
+    },
+  });
+
   // Set initial states
-  gsap.set(pulsePath.value, { strokeDasharray: 2000, strokeDashoffset: 2000 });
-  gsap.set(glowCircle.value, { opacity: 0, scale: 0 });
-  gsap.set(portal.value, { scaleY: 0, scaleX: 0.002, opacity: 0 });
+  if (pulsePath.value)
+    gsap.set(pulsePath.value, {
+      strokeDasharray: 2000,
+      strokeDashoffset: 2000,
+    });
+  if (glowCircle.value) gsap.set(glowCircle.value, { opacity: 0, scale: 0 });
+  if (portal.value)
+    gsap.set(portal.value, { scaleY: 0, scaleX: 0.002, opacity: 0 });
 
   // 1. Thread Trace
   tl.to(pulsePath.value, {
@@ -142,7 +152,7 @@ onMounted(async () => {
     "+=0.2",
   )
     .to(portal.value, {
-      scaleX: 1000, // Blow up horizontally
+      scaleX: 1000,
       duration: 1.2,
       ease: "power4.inOut",
     })
@@ -250,17 +260,5 @@ onMounted(async () => {
 
 .loader-fade-leave-to {
   opacity: 0;
-}
-
-@keyframes flicker {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 </style>

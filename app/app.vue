@@ -1,6 +1,8 @@
 <template>
   <div class="app-root">
-    <PageLoader @loaded="onLoaded" />
+    <ClientOnly>
+      <PageLoader @loaded="onLoaded" />
+    </ClientOnly>
     <div :class="{ 'content-hidden': !isLoaded }">
       <Hero3D />
       <Navbar />
@@ -11,11 +13,11 @@
 </template>
 
 <script setup>
-const isLoaded = useState('isLoaded', () => false)
+const isLoaded = ref(false);
 
 const onLoaded = () => {
-  isLoaded.value = true
-}
+  isLoaded.value = true;
+};
 </script>
 
 <style>
