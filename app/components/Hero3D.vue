@@ -151,9 +151,11 @@ const init = () => {
 
   // Load Model w/ Fallback
   const loader = new GLTFLoader();
-  // Use relative path for GitHub Pages compatibility
+  const config = useRuntimeConfig();
+  const modelPath = config.app.baseURL + "human.glb";
+
   loader.load(
-    "./human.glb",
+    modelPath,
     (gltf) => {
       model = gltf.scene;
       model.scale.set(2, 2, 2);

@@ -21,7 +21,7 @@
         <div class="project-media">
           <img
             v-if="project.image"
-            :src="project.image"
+            :src="`${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`"
             :alt="project.name"
             class="project-img"
           />
@@ -77,7 +77,7 @@ const projects = [
     year: "2024",
     tags: ["Laravel", "Tailwind CSS"],
     color: "#f05340",
-    image: "./vinsa-pc-thumbnail.png",
+    image: "/vinsa-pc-thumbnail.png",
     link: "https://vinsa.fr",
   },
   {
