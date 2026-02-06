@@ -9,6 +9,7 @@ export default defineNuxtConfig({
   },
   app: {
     baseURL: "/Hanz-Portofolio/",
+    buildAssetsDir: 'assets',
     head: {
       title: "Interactive Experience - Next Gen Web",
       meta: [
