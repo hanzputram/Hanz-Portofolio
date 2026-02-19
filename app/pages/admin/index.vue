@@ -6,14 +6,23 @@
         <p>Protected Access</p>
         <div class="input-group">
           <input
-            v-model="password"
+            v-model="githubToken"
             type="password"
-            placeholder="Enter Secret Key"
+            placeholder="GitHub Personal Access Token"
             @keyup.enter="login"
           />
+          <p class="help-text">
+            Don't have a token?
+            <a
+              href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio%20CMS"
+              target="_blank"
+              >Create one here</a
+            >
+            (require 'repo' scope).
+          </p>
         </div>
         <button class="cta-button primary" @click="login">
-          Access Dashboard
+          Login & Sync Repo
         </button>
         <p v-if="loginError" class="error">{{ loginError }}</p>
       </div>
@@ -220,28 +229,33 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 
-// Simple Auth (In a real app, use Nuxt Auth or similar)
+// Auth State
 const isAuthenticated = ref(false);
-const password = ref("");
+const githubToken = ref("");
 const loginError = ref("");
-const SECRET_KEY = "admin123"; // User can change this
+
+// Repo Config
+const REPO_OWNER = "hanzputram";
+const REPO_NAME = "Hanz-Portofolio";
+const CONTENT_PATH = "app/assets/data/site-content.json";
 
 const login = () => {
-  if (password.value === SECRET_KEY) {
+  if (githubToken.value.startsWith("ghp_")) {
     isAuthenticated.value = true;
-    localStorage.setItem("admin_auth", "true");
+    localStorage.setItem("github_token", githubToken.value);
+    fetchContent();
   } else {
-    loginError.value = "Incorrect password";
+    loginError.value = "Please enter a valid GitHub Personal Access Token";
   }
 };
 
 const logout = () => {
   isAuthenticated.value = false;
-  localStorage.removeItem("admin_auth");
+  localStorage.removeItem("github_token");
+  githubToken.value = "";
 };
 
 // Content State
-const config = useRuntimeConfig();
 const content = reactive({
   hero: { line1: "", line2: "", subtitle: "" },
   features: [],
@@ -251,49 +265,79 @@ const content = reactive({
   footer: { text: "" },
 });
 
+const fileSha = ref(""); // Required for GitHub API updates
+
+const fetchContent = async () => {
+  const token = localStorage.getItem("github_token");
+  if (!token) return;
+
+  try {
+    const response = await $fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`,
+      {
+        headers: { Authorization: `token ${token}` },
+      },
+    );
+
+    // Decode base64 content
+    const decoded = JSON.parse(atob(response.content));
+    Object.assign(content, decoded);
+    fileSha.value = response.sha;
+  } catch (err) {
+    console.error("Failed to fetch from GitHub:", err);
+    // Fallback if API fails (maybe repo is private or token invalid)
+    loginError.value = "Failed to fetch content. Check your token permissions.";
+    logout();
+  }
+};
+
 const uploadingIndex = ref(null);
 
 const handleFileUpload = async (event, index) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append("image", file);
+  const token = localStorage.getItem("github_token");
+  const reader = new FileReader();
 
   uploadingIndex.value = index;
-  try {
-    const data = await $fetch(`${config.public.apiBase}/upload`, {
-      method: "POST",
-      body: formData,
-    });
 
-    if (data.url) {
-      content.projects[index].image = data.url;
-      toastMessage.value = "Image uploaded successfully!";
+  reader.onload = async () => {
+    try {
+      const base64Content = reader.result.split(",")[1];
+      const fileName = `upload-${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+      const uploadPath = `public/uploads/${fileName}`;
+
+      const response = await $fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${uploadPath}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `token ${token}` },
+          body: {
+            message: `upload: ${fileName} for project ${index}`,
+            content: base64Content,
+          },
+        },
+      );
+
+      // GitHub Pages serves public/ directly at root
+      const publicUrl = `https://${REPO_OWNER}.github.io/${REPO_NAME}/uploads/${fileName}`;
+      content.projects[index].image = publicUrl;
+
+      toastMessage.value = "Image uploaded to GitHub!";
       toastType.value = "success";
       showToast.value = true;
       setTimeout(() => (showToast.value = false), 3000);
+    } catch (err) {
+      console.error("GitHub Upload failed:", err);
+      toastMessage.value = "Upload failed: " + err.message;
+      toastType.value = "error";
+      showToast.value = true;
+    } finally {
+      uploadingIndex.value = null;
     }
-  } catch (err) {
-    console.error("Upload failed:", err);
-    toastMessage.value = "Upload failed: " + (err.statusMessage || err.message);
-    toastType.value = "error";
-    showToast.value = true;
-    setTimeout(() => (showToast.value = false), 5000);
-  } finally {
-    uploadingIndex.value = null;
-  }
-};
-
-const fetchContent = async () => {
-  try {
-    const data = await $fetch(`${config.public.apiBase}/site-content`);
-    if (data && Object.keys(data).length > 0) {
-      Object.assign(content, data);
-    }
-  } catch (err) {
-    console.error("Failed to fetch content from Laravel:", err);
-  }
+  };
+  reader.readAsDataURL(file);
 };
 
 const activeSection = ref("hero");
@@ -315,6 +359,7 @@ const addProject = () => {
     color: "#00f0ff",
     image: "",
     link: "",
+    description: "",
   });
 };
 
@@ -328,33 +373,52 @@ const toastMessage = ref("");
 const toastType = ref("success");
 
 const saveChanges = async () => {
+  const token = localStorage.getItem("github_token");
+  if (!token) return;
+
   saving.value = true;
   try {
-    await $fetch(`${config.public.apiBase}/site-content`, {
-      method: "POST",
-      body: content,
-    });
+    const updatedJson = JSON.stringify(content, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(updatedJson)));
 
-    toastMessage.value = "Changes published successfully to Laravel!";
+    await $fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`,
+      {
+        method: "PUT",
+        headers: { Authorization: `token ${token}` },
+        body: {
+          message: "cms: update site content via admin panel",
+          content: base64Content,
+          sha: fileSha.value,
+        },
+      },
+    );
+
+    toastMessage.value =
+      "Changes pushed to GitHub! Site will rebuild in 1-2 mins.";
     toastType.value = "success";
     showToast.value = true;
-    setTimeout(() => (showToast.value = false), 3000);
+
+    // Refresh SHA for next save
+    await fetchContent();
+
+    setTimeout(() => (showToast.value = false), 5000);
   } catch (err) {
-    console.error("Save error:", err);
-    toastMessage.value =
-      "Failed to save changes: " + (err.statusMessage || err.message);
+    console.error("Push error:", err);
+    toastMessage.value = "Failed to push to GitHub: " + err.message;
     toastType.value = "error";
     showToast.value = true;
-    setTimeout(() => (showToast.value = false), 5000);
   } finally {
     saving.value = false;
   }
 };
 
 onMounted(() => {
-  fetchContent();
-  if (localStorage.getItem("admin_auth") === "true") {
+  const savedToken = localStorage.getItem("github_token");
+  if (savedToken) {
+    githubToken.value = savedToken;
     isAuthenticated.value = true;
+    fetchContent();
   }
 });
 </script>
@@ -470,6 +534,18 @@ onMounted(() => {
 .save-btn.saving {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.help-text {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.help-text a {
+  color: var(--accent-secondary);
+  text-decoration: underline;
 }
 
 .logout-btn {
