@@ -55,34 +55,35 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-const info = [
-  {
-    title: "Vision",
-    desc: "To bridge the gap between aesthetic web design and measurable business growth, ensuring every custom-built site serves as a high-performance engine for digital success.",
-  },
-  {
-    title: "Mission",
-    desc: "To empower brands with tailor-made web solutions that prioritize speed, clean code, and search engine dominance. I provide a scalable digital platform built with modern technologies and optimized for maximum visibility.",
-  },
-  {
-    title: "Skills",
-    desc: "I am a passionate Junior Web Developer with a strong foundation in modern web technologies. My expertise includes building responsive, user-centric websites using HTML, CSS, JavaScript, and frameworks like Vue.js and Nuxt.js, along with PHP.",
-  },
-];
+const config = useRuntimeConfig();
 
-const techStack = [
-  "Nuxt",
-  "Vue",
-  "GSAP",
-  "Three.js",
-  "WebGL",
-  "Tailwind",
-  "Vite",
-  "Node.js",
-];
+// Fetch content from Laravel API
+const { data: remoteContent } = await useAsyncData("site-content", () =>
+  $fetch(`${config.public.apiBase}/site-content`),
+);
+
+// Fallback to local data if API fails or is empty
+import localData from "~/assets/data/site-content.json";
+
+const siteContent = computed(() => {
+  if (remoteContent.value && Object.keys(remoteContent.value).length > 0) {
+    return remoteContent.value;
+  }
+  return localData;
+});
+
+const isLoaded = useState("isLoaded");
+const info = computed(() =>
+  siteContent.value.features.map((f) => ({
+    title: f.title,
+    desc: f.description,
+  })),
+);
+const techStack = computed(() => siteContent.value.techStack);
 
 const onTechHover = (e) => {
   const el = e.target;

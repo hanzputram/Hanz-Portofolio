@@ -7,9 +7,14 @@ export default defineNuxtConfig({
   nitro: {
     static: true,
   },
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8000/api",
+    },
+  },
   app: {
     baseURL: "/Hanz-Portofolio/",
-    buildAssetsDir: 'assets',
+    buildAssetsDir: "assets",
     head: {
       title: "Interactive Experience - Next Gen Web",
       meta: [

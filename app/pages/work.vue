@@ -21,7 +21,11 @@
         <div class="project-media">
           <img
             v-if="project.image"
-            :src="`${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`"
+            :src="
+              project.image.startsWith('http')
+                ? project.image
+                : `${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`
+            "
             :alt="project.name"
             class="project-img"
           />
@@ -50,8 +54,13 @@
         </div>
 
         <div class="project-info">
-          <h2 class="project-name">{{ project.name }}</h2>
-          <p class="project-year">{{ project.year }}</p>
+          <div class="info-top">
+            <h2 class="project-name">{{ project.name }}</h2>
+            <p class="project-year">{{ project.year }}</p>
+          </div>
+          <p v-if="project.description" class="project-desc">
+            {{ project.description }}
+          </p>
         </div>
       </div>
     </section>
@@ -67,27 +76,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
+import gsap from "gsap";
+
+const config = useRuntimeConfig();
+
+// Fetch content from Laravel API
+const { data: remoteContent } = await useAsyncData("site-content", () =>
+  $fetch(`${config.public.apiBase}/site-content`),
+);
+
+// Fallback to local data if API fails or is empty
+import localData from "~/assets/data/site-content.json";
+
+const siteContent = computed(() => {
+  if (remoteContent.value && Object.keys(remoteContent.value).length > 0) {
+    return remoteContent.value;
+  }
+  return localData;
+});
 
 const activeProject = ref(null);
-
-const projects = [
-  {
-    name: "Vinsa.fr",
-    year: "2024",
-    tags: ["Laravel", "Tailwind CSS"],
-    color: "#f05340",
-    image: "/vinsa-pc-thumbnail.png",
-    link: "https://vinsa.fr",
-  },
-  {
-    name: "Coming Soon",
-    year: "2026",
-    tags: ["Future", "Project"],
-    color: "#222222",
-    image: null,
-  },
-];
+const projects = computed(() => siteContent.value.projects);
 </script>
 
 <style scoped>
@@ -230,9 +240,13 @@ const projects = [
 
 .project-info {
   margin-top: 1.5rem;
+}
+
+.info-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  margin-bottom: 0.5rem;
 }
 
 .project-name {
@@ -243,6 +257,13 @@ const projects = [
 .project-year {
   font-size: 0.9rem;
   opacity: 0.4;
+}
+
+.project-desc {
+  font-size: 0.95rem;
+  opacity: 0.6;
+  line-height: 1.6;
+  max-width: 90%;
 }
 
 .project-bg {

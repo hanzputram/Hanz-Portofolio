@@ -1,0 +1,50 @@
+{
+  "hero": {
+    "line1": "Hello I'am",
+    "line2": "Hanz",
+    "subtitle": "Junior Web Developer",
+    "primaryAction": "Start Journey",
+    "secondaryAction": "Learn More"
+  },
+  "features": [
+    {
+      "id": "01",
+      "title": "Vision",
+      "description": "To bridge the gap between aesthetic web design and measurable business growth, ensuring every custom-built site serves as a high-performance engine for digital success."
+    },
+    {
+      "id": "02",
+      "title": "Mission",
+      "description": "To empower brands with tailor-made web solutions that prioritize speed, clean code, and search engine dominance. I aim to deliver more than just a URL. I provide a scalable digital platform built with modern technologies and optimized for maximum visibility"
+    },
+    {
+      "id": "03",
+      "title": "Skills",
+      "description": "I am a passionate Junior Web Developer with a strong foundation in modern web technologies. My expertise includes building responsive, user-centric websites using HTML, CSS, JavaScript, and frameworks like Vue.js and Nuxt.js also PHP. I am dedicated to writing clean, efficient code and continuously expanding my skill set to deliver high-quality digital solutions."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Vinsa.fr",
+      "year": "2024",
+      "tags": ["Laravel", "Tailwind CSS"],
+      "color": "#f05340",
+      "image": "/vinsa-pc-thumbnail.png",
+      "link": "https://vinsa.fr"
+    }
+  ],
+  "marqueeText": "INTERACTIVE • CREATIVE • INNOVATIVE • NEXTGEN • EXPERIENCE •",
+  "techStack": [
+    "Nuxt",
+    "Vue",
+    "GSAP",
+    "Three.js",
+    "WebGL",
+    "Tailwind",
+    "Vite",
+    "Node.js"
+  ],
+  "footer": {
+    "text": "© 2026 Interactive Experience. Crafted with Nuxt."
+  }
+}

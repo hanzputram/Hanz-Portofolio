@@ -7,32 +7,29 @@
           <h1 class="hero-title">
             <div class="line">
               <span
-                v-for="(char, i) in 'Hello'.split('')"
+                v-for="(char, i) in siteContent.hero.line1.split('')"
                 :key="'h1-' + i"
-                class="hover-char"
-                >{{ char }}</span
-              >
-              <span class="space">&nbsp;</span>
-              <span
-                v-for="(char, i) in 'I\'am'.split('')"
-                :key="'h2-' + i"
                 class="hover-char"
                 >{{ char }}</span
               >
             </div>
             <div class="line">
               <span
-                v-for="(char, i) in 'Hanz'.split('')"
-                :key="'h3-' + i"
+                v-for="(char, i) in siteContent.hero.line2.split('')"
+                :key="'h2-' + i"
                 class="hover-char gradient-text glitched-char"
                 >{{ char }}</span
               >
             </div>
           </h1>
-          <p class="hero-subtitle">Junior Web Developer</p>
+          <p class="hero-subtitle">{{ siteContent.hero.subtitle }}</p>
           <div class="hero-actions">
-            <button class="cta-button primary">Start Journey</button>
-            <button class="cta-button secondary">Learn More</button>
+            <button class="cta-button primary">
+              {{ siteContent.hero.primaryAction }}
+            </button>
+            <button class="cta-button secondary">
+              {{ siteContent.hero.secondaryAction }}
+            </button>
           </div>
         </div>
         <div class="scroll-indicator">
@@ -45,57 +42,21 @@
       <!-- Content Grid -->
       <section class="content-section" id="features">
         <div class="grid-container">
-          <div class="card-wrapper" data-aos="fade-right" data-aos-offset="100">
-            <div class="card glass-panel">
-              <div class="glare"></div>
-              <div class="card-icon">01</div>
-              <h3>Vision</h3>
-              <p>
-                To bridge the gap between aesthetic web design and measurable
-                business growth, ensuring every custom-built site serves as a
-                high-performance engine for digital success.
-              </p>
-            </div>
-          </div>
-
           <div
+            v-for="(feature, idx) in siteContent.features"
+            :key="idx"
             class="card-wrapper"
-            data-aos="fade-up"
-            data-aos-delay="100"
+            :data-aos="
+              idx === 0 ? 'fade-right' : idx === 1 ? 'fade-up' : 'fade-left'
+            "
+            :data-aos-delay="idx * 100"
             data-aos-offset="100"
           >
             <div class="card glass-panel">
               <div class="glare"></div>
-              <div class="card-icon">02</div>
-              <h3>Mission</h3>
-              <p>
-                To empower brands with tailor-made web solutions that prioritize
-                speed, clean code, and search engine dominance. I aim to deliver
-                more than just a URL. I provide a scalable digital platform
-                built with modern technologies and optimized for maximum
-                visibility
-              </p>
-            </div>
-          </div>
-
-          <div
-            class="card-wrapper"
-            data-aos="fade-left"
-            data-aos-delay="200"
-            data-aos-offset="100"
-          >
-            <div class="card glass-panel">
-              <div class="glare"></div>
-              <div class="card-icon">03</div>
-              <h3>Skills</h3>
-              <p>
-                I am a passionate Junior Web Developer with a strong foundation
-                in modern web technologies. My expertise includes building
-                responsive, user-centric websites using HTML, CSS, JavaScript,
-                and frameworks like Vue.js and Nuxt.js also PHP. I am dedicated
-                to writing clean, efficient code and continuously expanding my
-                skill set to deliver high-quality digital solutions.
-              </p>
+              <div class="card-icon">{{ feature.id }}</div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
             </div>
           </div>
         </div>
@@ -104,7 +65,7 @@
       <!-- Horizontal Scroll Text -->
       <section class="marquee-section">
         <div class="marquee-content outline-text">
-          INTERACTIVE • CREATIVE • INNOVATIVE • NEXTGEN • EXPERIENCE •
+          {{ siteContent.marqueeText }}
         </div>
       </section>
 
@@ -125,32 +86,50 @@
               My <span class="gradient-text">Portofolio</span>
             </h1>
             <div class="portals-grid">
-              <a href="https://vinsa.fr" target="_blank" class="portal-link">
-                <div
-                  class="portal-card glass-panel vinsa-project"
-                  data-aos="fade-up"
-                >
+              <a
+                v-for="(project, idx) in siteContent.projects"
+                :key="idx"
+                :href="project.link"
+                target="_blank"
+                class="portal-link"
+              >
+                <div class="portal-card glass-panel" data-aos="fade-up">
                   <div class="project-image-wrapper">
                     <img
-                      :src="`${useRuntimeConfig().app.baseURL}vinsa-thumbnail.png`"
-                      alt="Vinsa.fr"
+                      v-if="project.image"
+                      :src="
+                        project.image.startsWith('http')
+                          ? project.image
+                          : `${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`
+                      "
+                      :alt="project.name"
                       class="project-thumbnail"
                     />
+                    <div
+                      v-else
+                      class="media-placeholder"
+                      :style="{
+                        background: project.color,
+                        opacity: 0.2,
+                        width: '100%',
+                        height: '100%',
+                      }"
+                    ></div>
                     <div class="project-overlay">
                       <span class="view-project">View Site</span>
                     </div>
                   </div>
                   <div class="project-info">
-                    <h3>Vinsa.fr</h3>
-                    <p>Industrial Electrical Solutions</p>
+                    <h3>{{ project.name }}</h3>
+                    <p>{{ project.tags.join(" • ") }}</p>
                   </div>
                 </div>
               </a>
 
               <div
                 class="portal-card glass-panel coming-soon"
-                v-for="n in 5"
-                :key="n"
+                v-for="n in Math.max(0, 5 - siteContent.projects.length)"
+                :key="'placeholder-' + n"
               >
                 <div class="coming-soon-content">
                   <div class="placeholder-icon">?</div>
@@ -166,7 +145,19 @@
       <footer class="footer">
         <div class="footer-content">
           <div class="logo">Hanz<span class="dot">.</span></div>
-          <p>© 2026 Interactive Experience. Crafted with Nuxt.</p>
+          <p>
+            {{ siteContent.footer.text }}
+            <NuxtLink
+              to="/admin"
+              style="
+                opacity: 0.1;
+                margin-left: 10px;
+                text-decoration: none;
+                color: inherit;
+              "
+              >Admin</NuxtLink
+            >
+          </p>
         </div>
       </footer>
     </main>
@@ -177,6 +168,23 @@
 import { onMounted, watch } from "vue";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+
+const config = useRuntimeConfig();
+
+// Fetch content from Laravel API
+const { data: remoteContent } = await useAsyncData("site-content", () =>
+  $fetch(`${config.public.apiBase}/site-content`),
+);
+
+// Fallback to local data if API fails or is empty
+import localData from "~/assets/data/site-content.json";
+
+const siteContent = computed(() => {
+  if (remoteContent.value && Object.keys(remoteContent.value).length > 0) {
+    return remoteContent.value;
+  }
+  return localData;
+});
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -345,9 +353,10 @@ onMounted(() => {
 
   // Phase 1: Zoom into the card
   tl.to(showcaseContent, {
-    scale: 80,
+    scale: 100,
     opacity: 0,
-    duration: 5,
+    duration: 6,
+    filter: "blur(20px)",
     ease: "power2.in",
   })
     // Phase 2: Fade in the Matrix content
@@ -390,73 +399,6 @@ onMounted(() => {
 .main-wrapper {
   position: relative;
   z-index: 1;
-}
-
-/* Include all previous CSS plus new styles for hidden dimension */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 2rem 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 100;
-  box-sizing: border-box;
-  mix-blend-mode: difference;
-  color: white;
-  transition: all 0.4s ease;
-}
-
-.header.scrolled {
-  padding: 1rem 5%;
-  mix-blend-mode: normal;
-  background: rgba(3, 3, 3, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.logo {
-  font-family: "Outfit", sans-serif;
-  font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: 1px;
-}
-.dot {
-  color: var(--accent-secondary);
-}
-.nav-link {
-  color: white;
-  text-decoration: none;
-  margin-left: 3rem;
-  font-weight: 500;
-  position: relative;
-  padding: 0.5rem 0;
-  opacity: 0.7;
-  transition: opacity 0.3s;
-}
-.nav-link:hover {
-  opacity: 1;
-}
-.nav-link::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--accent-color),
-    var(--accent-secondary)
-  );
-  transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-  box-shadow: 0 0 10px var(--accent-secondary);
-}
-.nav-link:hover::after {
-  width: 100%;
 }
 
 .hero-section {
