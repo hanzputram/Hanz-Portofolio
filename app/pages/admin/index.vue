@@ -279,8 +279,10 @@ const fetchContent = async () => {
       },
     );
 
-    // Decode base64 content
-    const decoded = JSON.parse(atob(response.content));
+    // Decode base64 content with UTF-8 support
+    const decoded = JSON.parse(
+      decodeURIComponent(escape(atob(response.content.replace(/\s/g, "")))),
+    );
     Object.assign(content, decoded);
     fileSha.value = response.sha;
   } catch (err) {
@@ -302,13 +304,17 @@ const handleFileUpload = async (event, index) => {
 
   uploadingIndex.value = index;
 
+  // Show local preview immediately
+  const localUrl = URL.createObjectURL(file);
+  content.projects[index].image = localUrl;
+
   reader.onload = async () => {
     try {
       const base64Content = reader.result.split(",")[1];
       const fileName = `upload-${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
       const uploadPath = `public/uploads/${fileName}`;
 
-      const response = await $fetch(
+      await $fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${uploadPath}`,
         {
           method: "PUT",
@@ -320,11 +326,11 @@ const handleFileUpload = async (event, index) => {
         },
       );
 
-      // GitHub Pages serves public/ directly at root
-      const publicUrl = `https://${REPO_OWNER}.github.io/${REPO_NAME}/uploads/${fileName}`;
-      content.projects[index].image = publicUrl;
+      // Use RAW Github URL for instant visibility (no delay)
+      const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${uploadPath}`;
+      content.projects[index].image = rawUrl;
 
-      toastMessage.value = "Image uploaded to GitHub!";
+      toastMessage.value = "Image uploaded and live!";
       toastType.value = "success";
       showToast.value = true;
       setTimeout(() => (showToast.value = false), 3000);
