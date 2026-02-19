@@ -28,6 +28,9 @@ jobs:
 
       - name: Generate Static Site
         run: npm run generate
+        env:
+          NUXT_PUBLIC_API_BASE: ${{ vars.NUXT_PUBLIC_API_BASE }}
+          BASE_URL: "/Hanz-Portofolio/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
