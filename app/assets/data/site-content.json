@@ -27,13 +27,27 @@
     {
       "name": "Vinsa.fr",
       "year": "2024",
-      "tags": ["Laravel", "Tailwind CSS"],
+      "tags": [
+        "Laravel",
+        "Tailwind CSS"
+      ],
       "color": "#f05340",
       "image": "/vinsa-pc-thumbnail.png",
       "link": "https://vinsa.fr"
+    },
+    {
+      "name": "3D Artists Portofolio",
+      "year": "2026",
+      "tags": [
+        "Laravel",
+        "Tailwind CSS"
+      ],
+      "color": "#00f0ff",
+      "image": "https://hanzputram.github.io/Hanz-Portofolio/uploads/upload-1771488037330-Screenshot-2026-02-19-142941.png",
+      "link": "https://harizporto.my.id",
+      "description": "This Project using AOS, and automatic fetch image from link that inputed"
     }
   ],
-  "marqueeText": "INTERACTIVE • CREATIVE • INNOVATIVE • NEXTGEN • EXPERIENCE •",
   "techStack": [
     "Nuxt",
     "Vue",
@@ -44,7 +58,8 @@
     "Vite",
     "Node.js"
   ],
+  "marqueeText": "INTERACTIVE Ã¢ÂÂ¢ CREATIVE Ã¢ÂÂ¢ INNOVATIVE Ã¢ÂÂ¢ NEXTGEN Ã¢ÂÂ¢ EXPERIENCE Ã¢ÂÂ¢",
   "footer": {
-    "text": "© 2026 Interactive Experience. Crafted with Nuxt."
+    "text": "ÃÂ© 2026 Interactive Experience. Crafted with Nuxt."
   }
 }
