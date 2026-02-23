@@ -46,6 +46,18 @@
       "image": "https://hanzputram.github.io/Hanz-Portofolio/uploads/upload-1771488037330-Screenshot-2026-02-19-142941.png",
       "link": "https://harizporto.my.id",
       "description": "This Project using AOS, and automatic fetch image from link that inputed"
+    },
+    {
+      "name": "New Project",
+      "year": "2026",
+      "tags": [
+        "Vue",
+        "Nuxt"
+      ],
+      "color": "#00f0ff",
+      "image": "blob:http://localhost:3000/c99c4108-3c5f-4f30-b90d-125b5712a04e",
+      "link": "asdfsfakdsjji",
+      "description": "asdasdasda"
     }
   ],
   "techStack": [
