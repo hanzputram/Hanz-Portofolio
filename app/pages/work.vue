@@ -14,6 +14,7 @@
         v-for="(project, index) in projects"
         :key="project.name"
         class="project-card"
+        :class="{ 'no-link': !project.link }"
         :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'"
         @mouseenter="activeProject = project"
         @mouseleave="activeProject = null"
@@ -134,6 +135,9 @@ const projects = computed(() => siteContent.value.projects);
 
 .project-card {
   cursor: pointer;
+}
+.project-card.no-link {
+  cursor: default;
 }
 
 .project-media {

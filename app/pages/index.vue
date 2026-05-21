@@ -86,12 +86,14 @@
               My <span class="gradient-text">Portofolio</span>
             </h1>
             <div class="portals-grid">
-              <a
+              <component
+                :is="project.link ? 'a' : 'div'"
                 v-for="(project, idx) in siteContent.projects"
                 :key="idx"
-                :href="project.link"
+                :href="project.link || undefined"
                 target="_blank"
                 class="portal-link"
+                :class="{ 'no-link': !project.link }"
               >
                 <div class="portal-card glass-panel" data-aos="fade-up">
                   <div class="project-image-wrapper">
@@ -116,7 +118,7 @@
                       }"
                     ></div>
                     <div class="project-overlay">
-                      <span class="view-project">View Site</span>
+                      <span class="view-project">{{ project.link ? 'View Site' : 'Coming Soon' }}</span>
                     </div>
                   </div>
                   <div class="project-info">
@@ -124,7 +126,7 @@
                     <p>{{ project.tags.join(" • ") }}</p>
                   </div>
                 </div>
-              </a>
+              </component>
 
               <div
                 class="portal-card glass-panel coming-soon"
@@ -703,6 +705,9 @@ onMounted(() => {
   flex-shrink: 0;
   overflow: hidden;
   cursor: pointer;
+}
+.no-link .portal-card {
+  cursor: default;
 }
 
 @media (max-height: 800px) {
