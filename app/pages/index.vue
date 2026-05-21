@@ -334,63 +334,90 @@ onMounted(() => {
     });
   });
 
-  // Portal Transition Animation
+  // Portal Transition Animation — responsive via ScrollTrigger.matchMedia
   const showcaseSection = document.querySelector(".showcase-section");
   const showcaseContent = document.querySelector(".showcase-content");
   const hiddenDimension = document.querySelector(".hidden-dimension");
   const dimensionContent = document.querySelector(".dimension-content");
   const portalsGrid = document.querySelector(".portals-grid");
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: showcaseSection,
-      start: "top top",
-      end: "+=600%", // Longer scroll distance for both zoom and horizontal scroll
-      pin: true,
-      scrub: 1,
+  const buildPortalTimeline = (isVertical) => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: showcaseSection,
+        start: "top top",
+        end: isVertical ? "+=400%" : "+=600%",
+        pin: true,
+        scrub: 1,
+      },
+    });
+
+    // Phase 1: Zoom into the card
+    tl.to(showcaseContent, {
+      scale: 100,
+      opacity: 0,
+      duration: 6,
+      filter: "blur(20px)",
+      ease: "power2.in",
+    })
+      // Phase 2: Fade in the portfolio content
+      .to(
+        hiddenDimension,
+        {
+          opacity: 1,
+          pointerEvents: "all",
+          duration: 2,
+          ease: "power1.inOut",
+        },
+        "-=1",
+      )
+      .from(
+        dimensionContent,
+        {
+          y: 100,
+          opacity: 0,
+          duration: 2,
+          ease: "power2.out",
+        },
+        "<",
+      );
+
+    // Phase 3: Scroll direction based on viewport
+    if (isVertical) {
+      tl.to(portalsGrid, {
+        y: () =>
+          -(
+            portalsGrid.scrollHeight -
+            window.innerHeight +
+            window.innerHeight * 0.15
+          ),
+        ease: "none",
+        duration: 10,
+      });
+    } else {
+      tl.to(portalsGrid, {
+        x: () =>
+          -(
+            portalsGrid.scrollWidth -
+            window.innerWidth +
+            window.innerWidth * 0.1
+          ),
+        ease: "none",
+        duration: 10,
+      });
+    }
+  };
+
+  ScrollTrigger.matchMedia({
+    // Desktop: horizontal scroll
+    "(min-width: 769px)": function () {
+      buildPortalTimeline(false);
+    },
+    // Mobile: vertical scroll
+    "(max-width: 768px)": function () {
+      buildPortalTimeline(true);
     },
   });
-
-  // Phase 1: Zoom into the card
-  tl.to(showcaseContent, {
-    scale: 100,
-    opacity: 0,
-    duration: 6,
-    filter: "blur(20px)",
-    ease: "power2.in",
-  })
-    // Phase 2: Fade in the Matrix content
-    .to(
-      hiddenDimension,
-      {
-        opacity: 1,
-        pointerEvents: "all",
-        duration: 2,
-        ease: "power1.inOut",
-      },
-      "-=1",
-    )
-    .from(
-      dimensionContent,
-      {
-        y: 100,
-        opacity: 0,
-        duration: 2,
-        ease: "power2.out",
-      },
-      "<",
-    )
-    // Phase 3: Horizontal scroll the cards
-    .to(portalsGrid, {
-      x: () =>
-        -(
-          portalsGrid.scrollWidth -
-          window.innerWidth +
-          window.innerWidth * 0.1
-        ),
-      ease: "none",
-      duration: 10,
-    });
 });
 </script>
 
@@ -807,12 +834,125 @@ onMounted(() => {
   .desktop-nav {
     display: none;
   }
+
+  /* Hero Section Mobile */
+  .hero-title {
+    font-size: clamp(2rem, 10vw, 3.5rem);
+    letter-spacing: -1px;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+    padding: 0 1rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  .cta-button {
+    padding: 1rem 2rem;
+    font-size: 0.95rem;
+    width: 80%;
+    max-width: 280px;
+  }
+
+  /* Content Section Mobile */
+  .content-section {
+    padding: 4rem 5%;
+  }
+  .grid-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .card {
+    padding: 2rem;
+  }
+
+  /* Marquee Mobile */
+  .marquee-content {
+    font-size: clamp(2rem, 8vw, 4rem);
+  }
+
+  /* Showcase / Portal Section Mobile */
+  .showcase-section {
+    padding: 2rem 5%;
+  }
+  .showcase-content {
+    padding: 2rem;
+  }
+  .showcase-content h2 {
+    font-size: 1.3rem;
+  }
+  .showcase-content p {
+    font-size: 0.9rem;
+  }
+
+  .hidden-dimension {
+    padding-left: 5%;
+    padding-right: 5%;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 2rem;
+    overflow: visible;
+  }
+  .dimension-content {
+    text-align: center;
+    width: 100%;
+  }
+  .glow-text {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Portals Grid — vertical on mobile */
+  .portals-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 0;
+    padding-bottom: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .portal-card {
+    min-width: unset;
+    width: 90vw;
+    max-width: 360px;
+    height: 380px;
+  }
+
+  .project-info h3 {
+    font-size: 1.2rem;
+  }
+  .project-info p {
+    font-size: 0.8rem;
+  }
+  .project-info {
+    padding: 1rem;
+  }
+
+  /* Footer Mobile */
+  .footer {
+    padding: 2.5rem 5%;
+  }
   .footer-content {
     flex-direction: column;
     gap: 1rem;
+    text-align: center;
   }
-  .portals-grid {
-    flex-direction: column;
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .hero-title {
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
+  }
+  .portal-card {
+    width: 92vw;
+    height: 340px;
+  }
+  .glow-text {
+    font-size: 1.5rem !important;
   }
 }
 </style>
