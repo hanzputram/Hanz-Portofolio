@@ -173,7 +173,7 @@ const config = useRuntimeConfig();
 
 // Fetch content from Laravel API
 const { data: remoteContent } = await useAsyncData("site-content", () =>
-  $fetch(`${config.public.apiBase}/site-content`),
+  $fetch(`${config.public.apiBase}/site-content`).catch(() => null),
 );
 
 // Fallback to local data if API fails or is empty

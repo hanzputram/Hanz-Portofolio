@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
   nitro: {
     static: true,
+    prerender: {
+      failOnError: false
+    }
   },
   runtimeConfig: {
     public: {
