@@ -98,7 +98,7 @@ const siteContent = computed(() => {
 });
 
 const activeProject = ref(null);
-const projects = computed(() => siteContent.value.projects);
+const projects = computed(() => siteContent.value.projects.filter(project => project.link));
 </script>
 
 <style scoped>
