@@ -86,47 +86,63 @@
               My <span class="gradient-text">Portofolio</span>
             </h1>
             <div class="portals-grid">
-              <component
-                :is="project.link ? 'a' : 'div'"
+              <template
                 v-for="(project, idx) in siteContent.projects"
                 :key="idx"
-                :href="project.link || undefined"
-                target="_blank"
-                class="portal-link"
-                :class="{ 'no-link': !project.link }"
               >
-                <div class="portal-card glass-panel" data-aos="fade-up">
-                  <div class="project-image-wrapper">
-                    <img
-                      v-if="project.image"
-                      :src="
-                        project.image.startsWith('http')
-                          ? project.image
-                          : `${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`
-                      "
-                      :alt="project.name"
-                      class="project-thumbnail"
-                    />
-                    <div
-                      v-else
-                      class="media-placeholder"
-                      :style="{
-                        background: project.color,
-                        opacity: 0.2,
-                        width: '100%',
-                        height: '100%',
-                      }"
-                    ></div>
-                    <div class="project-overlay">
-                      <span class="view-project">{{ project.link ? 'View Site' : 'Coming Soon' }}</span>
+                <!-- Render normal project card if link is present -->
+                <a
+                  v-if="project.link"
+                  :href="project.link"
+                  target="_blank"
+                  class="portal-link"
+                >
+                  <div class="portal-card glass-panel" data-aos="fade-up">
+                    <div class="project-image-wrapper">
+                      <img
+                        v-if="project.image"
+                        :src="
+                          project.image.startsWith('http')
+                            ? project.image
+                            : `${useRuntimeConfig().app.baseURL}${project.image.replace(/^\//, '')}`
+                        "
+                        :alt="project.name"
+                        class="project-thumbnail"
+                      />
+                      <div
+                        v-else
+                        class="media-placeholder"
+                        :style="{
+                          background: project.color,
+                          opacity: 0.2,
+                          width: '100%',
+                          height: '100%',
+                        }"
+                      ></div>
+                      <div class="project-overlay">
+                        <span class="view-project">View Site</span>
+                      </div>
+                    </div>
+                    <div class="project-info">
+                      <h3>{{ project.name }}</h3>
+                      <p>{{ project.tags.join(" • ") }}</p>
                     </div>
                   </div>
-                  <div class="project-info">
-                    <h3>{{ project.name }}</h3>
-                    <p>{{ project.tags.join(" • ") }}</p>
+                </a>
+
+                <!-- Render Coming Soon placeholder if link is empty -->
+                <div
+                  v-else
+                  class="portal-card glass-panel coming-soon"
+                  data-aos="fade-up"
+                >
+                  <div class="coming-soon-content">
+                    <div class="placeholder-icon">?</div>
+                    <h3>Coming Soon</h3>
+                    <p>Exciting project in progress</p>
                   </div>
                 </div>
-              </component>
+              </template>
 
               <div
                 class="portal-card glass-panel coming-soon"
